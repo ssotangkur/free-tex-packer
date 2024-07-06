@@ -26,6 +26,21 @@ Webpack plugin: [https://github.com/odrick/webpack-free-tex-packer](https://gith
 
 CLI: [https://github.com/odrick/free-tex-packer-cli](https://github.com/odrick/free-tex-packer-cli)
 
+# Usage
+Since this is using an old version of electron, we need to use a similarly old version of Node.js that is compatible with it (ex. 10.11.0).
+You can install NVM or nvm-windows
+
+## Start webpack-dev-server from the project dir
+```
+npm run start-electron
+```
+
+## Then start electron from the electron dir (in another terminal)
+```
+cd electron
+npm run start
+```
+
 # Custom templates
 Free texture packer uses [mustache](http://mustache.github.io/) template engine.
 

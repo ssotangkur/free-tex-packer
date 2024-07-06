@@ -24,6 +24,9 @@ plugins.push(new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
     'PLATFORM': JSON.stringify(PLATFORM)
 }));
+if (process.platform !== "darwin") { // don't ignore on OSX
+    plugins.push(new webpack.IgnorePlugin({ resourceRegExp: /^fsevents$/ }));
+}
 
 if (argv.build) {
     let outputDir;
@@ -36,7 +39,7 @@ if (argv.build) {
         outputDir = '../electron/www/';
     }
 
-    plugins.push(new CopyWebpackPlugin([{from: 'src/client/resources', to: outputDir}]));
+    plugins.push(new CopyWebpackPlugin([{ from: 'src/client/resources', to: outputDir }]));
 
     devtool = false;
     output = outputDir + 'static/js/index.js';
@@ -44,7 +47,7 @@ if (argv.build) {
 }
 else {
     entry.push('webpack-dev-server/client?http://localhost:4000');
-    plugins.push(new CopyWebpackPlugin([{from: 'src/client/resources', to: './'}]));
+    plugins.push(new CopyWebpackPlugin([{ from: 'src/client/resources', to: './' }]));
 }
 
 let config = {
@@ -62,16 +65,16 @@ let config = {
             {
                 test: /.jsx?$/,
                 include: [path.resolve(__dirname, 'src')],
-                use: [{loader: 'babel-loader', options: {presets: ['@babel/preset-react', '@babel/preset-env']}}]
+                use: [{ loader: 'babel-loader', options: { presets: ['@babel/preset-react', '@babel/preset-env'] } }]
             },
             {
                 test: /\.js$/,
                 include: [path.resolve(__dirname, 'src')],
-                use: [{loader: 'babel-loader', options: {presets: ['@babel/preset-env']}}]
+                use: [{ loader: 'babel-loader', options: { presets: ['@babel/preset-env'] } }]
             },
             {
                 test: /\.(html|htm)$/,
-                use: [{loader: 'dom'}]
+                use: [{ loader: 'dom' }]
             }
         ]
     },
@@ -82,9 +85,9 @@ let config = {
 };
 
 if (target === 'electron-renderer') {
-    config.resolve = {alias: {'platform': path.resolve(__dirname, './src/client/platform/electron')}};
+    config.resolve = { alias: { 'platform': path.resolve(__dirname, './src/client/platform/electron') } };
 } else {
-    config.resolve = {alias: {'platform': path.resolve(__dirname, './src/client/platform/web')}};
+    config.resolve = { alias: { 'platform': path.resolve(__dirname, './src/client/platform/web') } };
 }
 
 module.exports = config;
