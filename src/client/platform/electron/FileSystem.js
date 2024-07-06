@@ -2,6 +2,7 @@ const fs = require('fs');
 const chokidar = require('chokidar');
 const { dialog } = require('electron').remote;
 const path = require('path');
+const _ = require('lodash');
 
 import Controller from 'platform/Controller';
 import I18 from '../../utils/I18';
@@ -176,7 +177,7 @@ class FileSystem {
             path = FileSystem.fixPath(path);
 
             try {
-                FileSystem.convertToRelativePath(data, path);
+                data = FileSystem.convertToRelativePath(data, path);
                 fs.writeFileSync(path, JSON.stringify(data, null, 2));
                 Controller.updateProject(path);
                 CURRENT_PROJECT_PATH = path;
@@ -187,51 +188,6 @@ class FileSystem {
         }
 
         return path;
-    }
-
-    static convertToRelativePath(data, projectFilePath) {
-        projectFilePath = FileSystem.fixPath(projectFilePath);
-        if (data.savePath) {
-            data.savePath = FileSystem.fixPath(path.relative(projectFilePath, data.savePath));
-        }
-        if (data.images && data.images.length) {
-            data.images.forEach((imageObj) => {
-                if (imageObj.path) {
-                    imageObj.path = FileSystem.fixPath(path.relative(projectFilePath, imageObj.path));
-                }
-            })
-        }
-        if (data.folders && data.folders.length) {
-            data.folders = data.folders.map((folder) => {
-                return FileSystem.fixPath(path.relative(projectFilePath, folder));
-            })
-        }
-        if (data.packOptions && data.packOptions.savePath) {
-            data.packOptions.savePath = FileSystem.fixPath(path.relative(projectFilePath, data.packOptions.savePath));
-        }
-    }
-
-    static convertToAbsolutePath(data, projectFilePath) {
-        projectFilePath = FileSystem.fixPath(projectFilePath)
-
-        if (data.savePath) {
-            data.savePath = FileSystem.fixPath(path.resolve(projectFilePath, data.savePath));
-        }
-        if (data.images && data.images.length) {
-            data.images.forEach((imageObj) => {
-                if (imageObj.path) {
-                    imageObj.path = FileSystem.fixPath(path.resolve(projectFilePath, imageObj.path));
-                }
-            })
-        }
-        if (data.folders && data.folders.length) {
-            data.folders = data.folders.map((folder) => {
-                return FileSystem.fixPath(path.resolve(projectFilePath, folder));
-            })
-        }
-        if (data.packOptions && data.packOptions.savePath) {
-            data.packOptions.savePath = FileSystem.fixPath(path.resolve(projectFilePath, data.packOptions.savePath));
-        }
     }
 
     static loadProject(pathToLoad = "") {
@@ -257,7 +213,7 @@ class FileSystem {
             try {
                 data = fs.readFileSync(path);
                 data = JSON.parse(data);
-                FileSystem.convertToAbsolutePath(data, path)
+                data = FileSystem.convertToAbsolutePath(data, path)
                 Controller.updateProject(path);
                 CURRENT_PROJECT_PATH = path;
             }
@@ -265,6 +221,54 @@ class FileSystem {
         }
 
         return { path, data };
+    }
+
+    static convertToRelativePath(data, projectFilePath) {
+        projectFilePath = FileSystem.fixPath(projectFilePath);
+        data = _.cloneDeep(data)
+        if (data.savePath) {
+            data.savePath = FileSystem.fixPath(path.relative(projectFilePath, data.savePath));
+        }
+        if (data.images && data.images.length) {
+            data.images.forEach((imageObj) => {
+                if (imageObj.path) {
+                    imageObj.path = FileSystem.fixPath(path.relative(projectFilePath, imageObj.path));
+                }
+            })
+        }
+        if (data.folders && data.folders.length) {
+            data.folders = data.folders.map((folder) => {
+                return FileSystem.fixPath(path.relative(projectFilePath, folder));
+            })
+        }
+        if (data.packOptions && data.packOptions.savePath) {
+            data.packOptions.savePath = FileSystem.fixPath(path.relative(projectFilePath, data.packOptions.savePath));
+        }
+        return data;
+    }
+
+    static convertToAbsolutePath(data, projectFilePath) {
+        projectFilePath = FileSystem.fixPath(projectFilePath);
+        data = _.cloneDeep(data);
+        if (data.savePath) {
+            data.savePath = FileSystem.fixPath(path.resolve(projectFilePath, data.savePath));
+        }
+        if (data.images && data.images.length) {
+            data.images.forEach((imageObj) => {
+                if (imageObj.path) {
+                    imageObj.path = FileSystem.fixPath(path.resolve(projectFilePath, imageObj.path));
+                }
+            })
+        }
+        if (data.folders && data.folders.length) {
+            data.folders = data.folders.map((folder) => {
+                return FileSystem.fixPath(path.resolve(projectFilePath, folder));
+            })
+        }
+        if (data.packOptions && data.packOptions.savePath) {
+            data.packOptions.savePath = FileSystem.fixPath(path.resolve(projectFilePath, data.packOptions.savePath));
+        }
+        return data;
     }
 }
 
